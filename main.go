@@ -24,19 +24,20 @@ func main() {
 var replN = ep.MustReplaceN
 
 func processOGLight(by []byte) []byte {
-	by = replN(by, `@name         OGLight`, `@name         OGLight Ninja`, 1)
+	by = replN(by, `@name         OGLight`, `@name         OGLight TBot`, 1)
 	by = replN(by, "// @match        https://*.ogame.gameforge.com/game/*\r\n",
-		`{old}// @match        *127.0.0.1*/bots/*/browser/html/*?page=*
+		`{old}// @match        */game/*?page=*
 // @match        *.ogame.ninja/bots/*/browser/html/*?page=*
 `, 1)
 	by = replN(by, `// ==/UserScript==`,
 		`{old}
 
-	const universeNum = /browser\/html\/s(\d+)-(\w+)/.exec(window.location.href)[1];
-	const lang = /browser\/html\/s(\d+)-(\w+)/.exec(window.location.href)[2];
+	const universeNum = document.querySelector('head meta[name="ogame-universe"]').getAttribute('content').replace(/\D/g,"");
+	const lang = document.querySelector('head meta[name="ogame-language"]').getAttribute('content');
 	const UNIVERSE = "s" + universeNum + "-" + lang;
 	const PROTOCOL = window.location.protocol;
 	const HOST = window.location.host;
+
 `, 1)
 	by = replN(by, "var cookieAccounts = document.cookie.match(/prsess\\_([0-9]+)=/g), cookieAccounts = cookieAccounts[cookieAccounts.length - 1].replace(/\\D/g, \"\");",
 		`var cookieAccounts=document.querySelector('head meta[name="ogame-player-id"]').getAttribute('content').replace(/\D/g, '');`, 1)
@@ -50,9 +51,9 @@ func processOGLight(by []byte) []byte {
 			return v.toString(16);
 		})`, 1)
 	by = replN(by, "url: `https://${window.location.host}/api/playerData.xml",
-		"url:`${PROTOCOL}//${HOST}/api/s${universeNum}/${lang}/playerData.xml", 1)
+		"url:`${PROTOCOL}//${HOST}/api/playerData.xml", 1)
 	by = replN(by, "url: `https://${window.location.host}/api/serverData.xml`,",
-		"url:`${PROTOCOL}//${HOST}/api/s${universeNum}/${lang}/serverData.xml`,", 1)
+		"url:`${PROTOCOL}//${HOST}/api/serverData.xml`,", 1)
 	by = replN(by, `${player.name} <a href="https://${window.location.host}/game/index.php?`,
 		`${player.name} <a href="${window.location.protocol}//${window.location.host}${window.location.pathname}?`, 1)
 	by = replN(by, "https://${window.location.host}/game/index.php?page=componentOnly&component=messagedetails&messageId=` + message.id",
